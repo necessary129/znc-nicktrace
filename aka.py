@@ -1,25 +1,26 @@
-#    znc-nicktrace: A ZNC module to track users
-#    Copyright (C) 2015 Evan Magaliff
+#  znc-nicktrace: A ZNC module to track users
+#  Copyright (C) 2015 Evan Magaliff
 #
-#    This program is free software; you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
-#    (at your option) any later version.
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    You should have received a copy of the GNU General Public License along
-#    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#  You should have received a copy of the GNU General Public License along
+#  with this program; if not, write to the Free Software Foundation, Inc.,
+#  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#   Authors: MuffinMedic (Evan), Aww (AwwCookies)                 #
-#   Last Update: Nov 18, 2015                                     #
-#   Version: 1.0.9                                                #
-#   Desc: A ZNC module to track users                             #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#  Authors: MuffinMedic (Evan), Aww (AwwCookies)                          #
+#  Last Update: Nov 18, 2015                                              #
+#  Version: 1.0.9b                                                        #
+#  Desc: A ZNC module to track users                                      #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import znc
 import os
@@ -354,6 +355,10 @@ class aka(znc.Module):
 
     ''' OK '''
     def cmd_seen(self, method, user_type, channel, user):
+        days_out = ''
+        hours_out = ''
+        minutes_out = ''
+
         if method == "in":
             if channel == 'PRIVMSG':
                 chan = 'Private Message'
@@ -364,8 +369,15 @@ class aka(znc.Module):
             data = self.c.fetchall()
             if len(data) > 0:
                 for row in data:
-                    days, hours, minutes = self.dt_diff(row[0])
-                    self.PutModule("%s %s was last seen in %s %s days, %s hours, %s minutes ago saying \"%s\" (%s)" % (user_type.title(), user, chan, days, hours, minutes, row[1], row[0]))
+                    days, hours, minutes, seconds = self.dt_diff(row[0])
+                    if days > 0:
+                        days_out = " %s days," % days
+                    if hours > 0:
+                        hours_out = " %s hours," % hours
+                    if minutes > 0:
+                        minutes_out = " %s minutes," % hours
+
+                    self.PutModule("%s %s was last seen in %s%s%s%s %s seconds ago saying \"%s\" (%s)" % (user_type.title(), user, chan, days_out, hours_out, minutes_out, seconds, row[1], row[0]))
             else:
                 self.PutModule("%s %s has not been seen talking in %s" % (user_type.title(), user, chan))
         elif method == "nick" or method == "host":
@@ -378,8 +390,15 @@ class aka(znc.Module):
                         chan = 'Private Message'
                     else:
                         chan = channel
-                    days, hours, minutes = self.dt_diff(row[1])
-                    self.PutModule("%s %s was last seen in %s %s days, %s hours, %s minutes ago saying \"%s\" (%s)" % (user_type.title(), user, row[0], days, hours, minutes, row[2], row[1]))
+                    days, hours, minutes, seconds = self.dt_diff(row[1])
+                    if days > 0:
+                        days_out = " %s days," % days
+                    if hours > 0:
+                        hours_out = " %s hours," % hours
+                    if minutes > 0:
+                        minutes_out = " %s minutes," % hours
+
+                    self.PutModule("%s %s was last seen in %s%s%s%s %s seconds ago saying \"%s\" (%s)" % (user_type.title(), user, row[0], days_out, hours_out, minutes_out, seconds, row[2], row[1]))
             else:
                 self.PutModule("%s %s has not been seen talking." % (user_type.title(), user))
 
@@ -621,7 +640,8 @@ class aka(znc.Module):
         days = diff.days
         hours = diff.seconds//3600
         minutes = (diff.seconds//60)%60
-        return days, hours, minutes
+        seconds = diff.seconds % 60
+        return days, hours, minutes, seconds
 
     ''' OK'''
     def cmd_getconfig(self):
@@ -633,7 +653,7 @@ class aka(znc.Module):
         valid = True
         bools = ["DEBUG_MODE", "NOTIFY_ON_JOIN", "NOTIFY_ON_MODE", "NOTIFY_ON_MODERATED", "PROCESS_CHANNEL_ON_JOIN", "PROCESS_CHANNELS_ON_LOAD"]
         if var_name.upper() in bools:
-            if not str(value).upper() == "TRUE" or not str(value).upper() == "FALSE":
+            if not str(value).upper() == "TRUE" and not str(value).upper() == "FALSE":
                 valid = False
                 self.PutModule("%s must be either True or False" % var_name)
         elif var_name == "NOTIFY_ON_JOIN_TIMEOUT":
