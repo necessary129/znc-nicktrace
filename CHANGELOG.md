@@ -1,23 +1,67 @@
 #### Upcoming changes
-  * Moderation log for forced removal from channel
   * DNS lookup for valid hosts (maybe)
-  * Lookup all nicks for given host in offenses and all hosts for given nick
+  * Has been authed to host
+  * Killed server and reason
+  * Convert query %s to ?
+  * Count unique nicks in trace nick
+  * \*net \*split warning
+  * Display both seen and process
+  * REGEX search for host match / IP / rDNS
+  * ident and name tracking
+  * Flood warning
+  * Account name tracking
+  * Ban evasion warning
+  * Trace IP if in host
+  * User modes in channel
+  * Trace ident
 
 # Changelog
 
+### Version 1.10.0
+  * `trace` only refers to `nick` or `host`; other commands not under `trace`
+  * Provided proper credit to contributors
+  * `seen` and `offenses` output formatting
+  * Logs "removed by" and "remove requested by" as moderated
+  * Fixed channel output for `seen` when not specified
+  * Removed `save` command
+  * Logs last server user was connected to
+  * Fix `all` for `offenses` and `seen`
+  * Identity updated when user processed
+  * `NOTIFY_ON_JOIN` uses `all` instead of `trace NOTIFY_DEFAULT_MODE`
+  * New `dbimport` command to import an entire database
+  * Real name added to user info
+  * `userinfo` command to show last known information for a nick or host
+  * `rawquery` command to run raw sqlite3 query
+  * [README](README.md) Table of Contents
+  * `PART` and `QUIT` tracking
+  * Do not process `WHO` every time client sends `WHO #channel` (OnLoad for many clients)
+  * New `process` command to manually trigger processing of a channel, user, or all channels
+  * Raw user information processed separately
+  * `geoip` uses last `processed_time` instead of `seen`
+  * `info` changed to `about`
+  * Only `PROCESS_CHANNELS_ON_LOAD` if not also set to `PROCESS_CHANNEL_ON_JOIN`
+  * Display `host` in `geoip nick`
+  * New `TRACK_SEEN` setting to turn on/off last seen tracking for users
+  * New `trace lasthost <nick>` command trace the last known host of the nick
+  * Improved pattern matching for \*-Lines
+  * No result messages for `userinfo`
+  * AWAY status now tracked
+  * Last quit, away, or return now displayed in seen
+  * Improper command output now shows valid options
+  * Tracks last join time per channel
+
 ### Version 1.0.9
-  * Display valid output options on invalid command
-  * Process all channels join load
+  * Process all channels on load
   * Process all users in channel on join
   * Better string processing
   * `seen in host` fix
-  * Clarified output
+  * Clarified output when no results found ([@iynque](https://github.com/iynque))
   * Improved `geoip`
-  * `trace nickchans` and `trace hostchans` merged into `trace channels`
+  * `trace nickchans` and `trace hostchans` merged into `channels`
   * Use native ZNC python settings `module.nv`
 
 ### Version 1.0.8
-  * `all` command to run complete trace on nick or host
+  * `all` command to run complete trace on nick or host ([@iynque](https://github.com/iynque))
   * More reliable `geoip nick` functionality
 
 ### Version 1.0.7
@@ -33,7 +77,7 @@
   * New `trace sharedchans nicks` and `trace sharedchans hosts`
 
 ### Version 1.0.4
-  * New `import` and `export` commands for sharing data
+  * New `import` and `export` commands for sharing data ([@KindOne](https://github.com/KindOne-))
   * G/K/Z/Q-Line and Kill tracking
 
 ### Version 1.0.3
@@ -63,7 +107,7 @@
 ### Version 0.8.2
   * Added `geoip <host>` command
   * Module reloads after `update`
-  * Fixed OnNick and OnQuit bug *(Credit: @KindOne-)*
+  * Fixed OnNick and OnQuit bug ([@KindOne](https://github.com/KindOne-))
 
 ### Version 0.8.1
   * Relocated save files to proper location
@@ -92,7 +136,7 @@
   * Added nick and channel inputs to intersect and sharedchans output
 
 ### Version 0.5.5
-  * Spelling fixes *(Credit: @Equinox)*
+  * Spelling fixes ([@Equinox](https://github.com/Equinox))
 
 ### Version 0.5.4
   * Fixed initialization error
