@@ -21,7 +21,7 @@
 #  Desc: A ZNC module to track users                                      #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-version = '1.10.0'
+version = '1.10.1'
 updated = "Feb 15, 2016"
 
 import znc
@@ -47,7 +47,7 @@ DEFAULT_CONFIG = {
     "NOTIFY_ON_MODERATED": False,
     "PROCESS_CHANNEL_ON_JOIN": False,
     "PROCESS_CHANNELS_ON_LOAD": False,
-    "TRACK_SEEN": False
+    "TRACK_SEEN": True
 }
 
 class aka(znc.Module):
@@ -532,7 +532,47 @@ class aka(znc.Module):
 
                     away_status = ""
 
-                    self.PutModule("%s%s seconds ago saying \"%s\" (%s) %s" % (out, seconds, row[1], row[0].partition('.')[0]), away_status)
+                    # seen = 0 , quit_time = 6, quit_msg = 7, away_msg = 8, away_time = 9, back_time = 10
+                    if row[6] != None and row[9] != None and row[10] != None:
+                        if row[0] > row[6] and row[0] > row[9] and row[0] > row[10]:
+                            away_status = "and has not since quit, been away, or returned."
+                        elif row[6] > row[0] and row[6] > row[9] and row[6] > row[10]:
+                            away_status = "and last quit at %s with message: \"%s\"" % (row[6].partition('.')[0], row[7])
+                        elif row[9] > row[0] and row[9] > row[6] and row[9] > row[10]:
+                            away_status = "and last went away at %s with message: \"%s\"" % (row[9].partition('.')[0], row[8])
+                        elif row[10] > row[0] and row[10] > row[6] and row[10] > row[9]:
+                            away_status = "and last returned from away at %s" % row[10].partition('.')[0]
+                    elif row[6] != None and row[9] != None and row[10] == None:
+                        if row[0] > row[6] and row[0] > row[9]:
+                            away_status = "and has not since quit, been away, or returned."
+                        elif row[6] > row[0] and row[6] > row[9]:
+                            away_status = "and last quit at %s with message: \"%s\"" % (row[6].partition('.')[0], row[7])
+                        elif row[9]> row[0] and row[9] > row[6]:
+                            away_status = "and last went away at %s with message: \"%s\"" % (row[9].partition('.')[0], row[8])
+                    elif row[6] != None and row[9] == None and row[10] != None:
+                        if row[0] > row[6] and row[0] > row[10]:
+                            away_status = "and has not since quit, been away, or returned."
+                        elif row[6] > row[0] and row[6] > row[10]:
+                            away_status = "and last quit at %s with message: \"%s\"" % (row[6].partition('.')[0], row[7])
+                        elif row[10]> row[0] and row[10] > row[6]:
+                            away_status = "and last returned from away at %s" % row[10].partition('.')[0]
+                    elif row[6] != None and row[9] == None and row[10] == None:
+                        if row[0] > row[6]:
+                            away_status = "and has not since quit, been away, or returned."
+                        elif row[6] > row[0]:
+                            away_status = "and last quit at %s with message: \"%s\"" % (row[6].partition('.')[0], row[7])
+                    elif row[6] == None and row[9] != None and row[10] == None:
+                        if row[0] > row[9]:
+                            away_status = "and has not since quit, been away, or returned."
+                        elif row[9] > row[0]:
+                            away_status = "and last went away at %s with message: \"%s\"" % (row[9].partition('.')[0], row[8])
+                    elif row[6] == None and row[9] == None and row[10] != None:
+                        if row[0] > row[10]:
+                            away_status = "and has not since quit, been away, or returned."
+                        elif row[10] > row[0]:
+                            away_status = "and last returned from away at %s" % row[10].partition('.')[0]
+
+                    self.PutModule("%s%s seconds ago saying \"%s\" (%s) %s" % (out, seconds, row[1], row[0].partition('.')[0], away_status))
             else:
                 self.PutModule("%s %s has not been seen talking in %s" % (user_type.title(), user, chan))
         elif method == "nick" or method == "host":
